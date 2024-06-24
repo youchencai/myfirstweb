@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <style>
+    body {
+      margin: 0 auto;
+      width: 100vw;
+      height: 100vh;
+      text-align: center;
+    }
+
+    .content {
+      display: inline-block;
+      margin: 0 auto;
+      top: 10%;
+      position: relative;
+    }
+
+    .row {
+      display: flex;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      border: 5px solid #777;
+      line-height: 0;
+      background-color: yellow;
+    }
+
+    .control {
+      position: relative;
+      top: 5px;
+      width: 330px;
+      margin: 0 auto;
+    }
+
+    #time, #combo {
+      width: 30%;
+      display: inline-block;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="content">
+    <div class="row">
+      <img src="state.png" class="cell" title="state" onclick="getcombo(0)">
+      <img src="state.png" class="cell" title="state" onclick="getcombo(1)">
+      <img src="state.png" class="cell" title="state" onclick="getcombo(2)">
+    </div>
+    <div class="row">
+      <img src="state.png" class="cell" title="state" onclick="getcombo(3)">
+      <img src="state.png" class="cell" title="state" onclick="getcombo(4)">
+      <img src="state.png" class="cell" title="state" onclick="getcombo(5)">
+    </div>
+    <div class="row">
+      <img src="state.png" class="cell" title="state" onclick="getcombo(6)">
+      <img src="state.png" class="cell" title="state" onclick="getcombo(7)">
+      <img src="state.png" class="cell" title="state" onclick="getcombo(8)">
+    </div>
+    <div class="control">
+      <div style="width:100%;display: flex">
+        <span id="time">剩餘時間:60s</span>
+        <input type="button" value="遊戲開始" style="width:40%">
+        <span id="combo">成績分數:0</span>
+      </div>
+      <hr>
+      <b>遊戲說明</b>
+      <p>按下遊戲開始之後，請利用電腦鍵盤數字1~9作為打地鼠動作。或也能支援手機畫面點選。</p>
+      <hr>
+    </div>
+  </div>
+
+  <script>
+    var btn = document.getElementsByTagName("input")[0];
+    var time = document.getElementById("time");
+    var combo = document.getElementById("combo");
+    btn.addEventListener("click", gamestart);
+    var flag = 0; 
+    var sec = 0;
+    var count = 0;
+    var wait = new Array();
+    var thedog = document.getElementsByClassName("cell");
+
+    function gamestart() { 
+      flag = 1;
+      count = 0;
+      sec = 60;
+      combo.textContent = `成績分數:0`;
+      time.textContent = `剩餘時間:60s`;
+      btn.removeEventListener("click", gamestart);
+
+      var start = setInterval(function () { 
+        if (sec == 0) { 
+          clearInterval(start);
+          flag = 0;
+          btn.addEventListener("click", gamestart);
+        }
+        else {
+          sec--;
+          time.textContent = `剩餘時間:${sec}s`;
+        }
+      }, 1000);
+
+      for (let i = 0; i < 100; i++) { 
+        let timeout = Math.floor(Math.random() * 57000);  
+        let who = Math.floor(Math.random() * 9); 
+        let delay=Math.floor(Math.random()*3)+1; 
+
+        setTimeout(function () { 
+          showdog(who, delay, i);
+        }, timeout);
+      }
+    }
+
+    function showdog(who, delay, id) {
+      if (thedog[who].title != "state") {
+        let next = (who + 1) % 9;
+        setTimeout(function () {
+          showdog(next, delay, id);
+        }, 500);
+      }
+      else {
+        
+        thedog[who].src = "on.png";
+        thedog[who].title = "hungry";
+        thedog[who].alt = id;
+        thedog[who].style.backgroundColor = "red";
+
+        wait[id] = setTimeout(function () {
+          thedog[who].src = "state.png";
+          thedog[who].title = "state";
+          thedog[who].style.backgroundColor = null;
+        }, delay * 1000);
+      }
+    }
+
+    document.onkeydown = keyboard; 
+    function keyboard() {
+      switch (event.keyCode) {
+        case 97:
+          getcombo(6);
+          break;
+        case 98:
+          getcombo(7);
+          break;
+        case 99:
+          getcombo(8);
+          break;
+        case 100:
+          getcombo(3);
+          break;
+        case 101:
+          getcombo(4);
+          break;
+        case 102:
+          getcombo(5);
+          break;
+        case 103:
+          getcombo(0);
+          break;
+        case 104:
+          getcombo(1);
+          break;
+        case 105:
+          getcombo(2);
+          break;
+      }
+    }
+    function getcombo(who) {
+      if (thedog[who].title == "hungry" && flag) {
+        thedog[who].src = "off.png";
+        thedog[who].title = "eating";
+        thedog[who].style.backgroundColor = "green";
+        id = thedog[who].alt;
+        clearTimeout(wait[id]); 
+
+        
+        count++;
+        combo.textContent = `成績分數:${count}`;
+
+        
+        setTimeout(function () {
+          thedog[who].src = "state.png";
+          thedog[who].title = "state";
+          thedog[who].alt = null;
+          thedog[who].style.backgroundColor = null;
+        }, 1000);
+      }
+    }
+  </script>
+
+</body>
+
+</html>
